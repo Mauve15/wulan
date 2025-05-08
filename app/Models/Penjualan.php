@@ -10,26 +10,27 @@ class Penjualan extends Model
     use HasFactory;
 
     protected $fillable = [
-        'kode_penjualan',
+        'no_invoice',
         'tanggal_penjualan',
-        'total_harga',
-        'diskon_id'
+        'quantity_jual',
+        'diskon_id',
+        'barang_id',
+        'total_harga_jual',
+        'pembelian_id',
     ];
 
-    // Relasi dengan Diskon
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class, 'barang_id');
+    }
+
     public function diskon()
     {
-        return $this->belongsTo(Diskon::class);
+        return $this->belongsTo(Diskon::class, 'diskon_id');
     }
 
-    // Relasi dengan DetailPenjualan
-    // app/Models/Penjualan.php
-    public function detailPenjualans()
+    public function pembelian()
     {
-        return $this->hasMany(DetailPenjualan::class);
+        return $this->belongsTo(Pembelian::class, 'pembelian_id');
     }
-
-
-    // Menghitung total harga dari penjualan setelah diskon per barang dan diskon global
-
 }

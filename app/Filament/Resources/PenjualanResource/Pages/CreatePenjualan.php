@@ -3,13 +3,11 @@
 namespace App\Filament\Resources\PenjualanResource\Pages;
 
 use App\Models\Barang;
-use App\Models\Penjualan;
-use App\Models\DetailPenjualan;
+use App\Models\Diskon;
+use App\Models\Pembelian;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\PenjualanResource;
-use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class CreatePenjualan extends CreateRecord
 {
@@ -17,56 +15,52 @@ class CreatePenjualan extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $total = 0;
+        $pembelian = Pembelian::with('barang')->find($data['pembelian_id']);
 
-        foreach ($data['detailPenjualans'] as &$detail) {
-            $jumlah = (int) $detail['jumlah_beli'];
-            $harga = (int) $detail['harga_jual'];
-            $diskon = 0;
-
-            if (!empty($detail['diskon_id'])) {
-                $diskonModel = \App\Models\Diskon::find($detail['diskon_id']);
-                $diskon = $diskonModel ? $diskonModel->jumlah_diskon : 0;
-            }
-
-            $subtotal = ($harga * $jumlah) - $diskon;
-            $total += $subtotal;
-
-            $detail['subtotal'] = $subtotal;
+        if (!$pembelian || !$pembelian->barang) {
+            throw ValidationException::withMessages([
+                'pembelian_id' => 'Pembelian atau barang terkait tidak ditemukan.',
+            ]);
         }
 
-        $data['total_harga'] = $total;
+        $hargaPerItem = $pembelian->harga_satuan;
+        $subtotal = $data['quantity_jual'] * $hargaPerItem;
+        $total = $subtotal * 1.20; // markup 15%
+
+        // Cek apakah ada diskon
+        if (!empty($data['diskon_id'])) {
+            $diskon = Diskon::find($data['diskon_id']);
+            if ($diskon) {
+                $total -= ($total * ($diskon->persentase / 100));
+            }
+        }
+
+        $data['total_harga_jual'] = (int) round($total);
+        $data['barang_id'] = $pembelian->barang->id; // 👈 Tambahkan ini
 
         return $data;
     }
 
     protected function afterCreate(): void
     {
-        $data = $this->form->getState();
+        $penjualan = $this->record;
+        $pembelian = Pembelian::with('barang')->find($penjualan->pembelian_id);
 
-        try {
-            DB::transaction(function () use ($data) {
-                foreach ($data['detailPenjualans'] as $detail) {
-                    DetailPenjualan::create([
-                        'penjualan_id' => $this->record->id,
-                        'barang_id' => $detail['barang_id'],
-                        'jumlah_beli' => $detail['jumlah_beli'],
-                        'harga_jual' => $detail['harga_jual'],
-                        'diskon_id' => $detail['diskon_id'] ?? null,
-                        'subtotal' => $detail['subtotal'],
-                    ]);
-                }
-            });
-        } catch (\Throwable $e) {
-            Log::error('Gagal menyimpan detail penjualan', [
-                'userId' => auth()->id(),
-                'error' => $e->getMessage(),
+        if (!$pembelian || !$pembelian->barang) {
+            throw ValidationException::withMessages([
+                'pembelian_id' => 'Barang dari pembelian tidak ditemukan.',
             ]);
+        }
 
-            Notification::make()
-                ->title('Gagal menyimpan detail penjualan: ' . $e->getMessage())
-                ->danger()
-                ->send();
+        $barang = $pembelian->barang;
+
+        if ($barang->quantity_barang >= $penjualan->quantity_jual) {
+            $barang->quantity_barang -= $penjualan->quantity_jual;
+            $barang->save();
+        } else {
+            throw ValidationException::withMessages([
+                'quantity_jual' => 'Stok barang tidak mencukupi.',
+            ]);
         }
     }
 }

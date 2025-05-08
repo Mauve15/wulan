@@ -2,111 +2,81 @@
 
 namespace App\Filament\Resources;
 
-use Closure;
+use App\Models\Penjualan;
 use Filament\Forms;
 use Filament\Tables;
-use App\Models\Barang;
-use App\Models\Diskon;
 use Filament\Forms\Form;
-use App\Models\Penjualan;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
 use App\Filament\Resources\PenjualanResource\Pages;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PenjualanResource extends Resource
 {
     protected static ?string $model = Penjualan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                // Input untuk kode penjualan
-                Forms\Components\TextInput::make('kode_penjualan')
-                    ->required()
-                    ->maxLength(255)
-                    ->label('Kode Penjualan'),
+        return $form->schema([
 
-                // Input untuk tanggal penjualan
-                Forms\Components\DatePicker::make('tanggal_penjualan')
-                    ->required()
-                    ->label('Tanggal Penjualan'),
+            DatePicker::make('tanggal_penjualan')
+                ->label('Tanggal Penjualan')
+                ->required(),
 
-                // Pilihan diskon
-                Forms\Components\Select::make('diskon_id')
-                    ->label('Diskon')
-                    ->options(Diskon::all()->pluck('nama_diskon', 'id'))
-                    ->searchable()
-                    ->nullable(),
+            TextInput::make('quantity_jual')
+                ->label('Jumlah Jual')
+                ->numeric()
+                ->required(),
 
-                // Tabel untuk memilih barang yang dijual
-                Forms\Components\Repeater::make('detailPenjualans')
-                    ->schema([
-                        // Pilih barang
-                        Forms\Components\Select::make('barang_id')
-                            ->label('Barang')
-                            ->options(Barang::all()->pluck('nama_barang', 'id'))
-                            ->searchable()
-                            ->required()
-                            ->reactive()
-                            ->afterStateUpdated(function (callable $set, $state) {
-                                $barang = Barang::find($state);
-                                if ($barang) {
-                                    $set('harga_jual', $barang->harga_jual);
-                                }
-                            }),
-
-                        // Input jumlah barang yang dijual
-                        Forms\Components\TextInput::make('jumlah_beli')
-                            ->numeric()
-                            ->minValue(1)
-                            ->required()
-                            ->label('Jumlah Beli'),
-
-                        Forms\Components\TextInput::make('harga_jual')
-                            ->numeric()
-                            ->minValue(0)
-                            ->required()
-                            ->label('Harga Jual'),
+            Select::make('pembelian_id')
+                ->label('Pembelian')
+                ->relationship('pembelian', 'nama_barang')
+                ->searchable()
+                ->required(),
 
 
-                        // Input diskon untuk tiap barang
-                        Forms\Components\Select::make('diskon_id')
-                            ->label('Diskon per Barang')
-                            ->options(Diskon::all()->pluck('jumlah_diskon', 'id'))
-                            ->searchable()
-                            ->nullable(),
+            Select::make('diskon_id')
+                ->label('Diskon (Opsional)')
+                ->relationship('diskon', 'nama_diskon')
+                ->searchable()
+                ->nullable(),
 
-                    ])
-                    ->minItems(1)
-                    ->maxItems(10)
-                    ->required()
-                    ->label('Detail Penjualan'),
-            ]);
+            TextInput::make('total_harga_jual')
+                ->label('Total Harga (Otomatis)')
+                ->numeric()
+                ->readOnly()
+                ->disabled(), // agar tidak bisa diubah manual di form
+        ]);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('kode_penjualan')->label('Kode Penjualan'),
-                Tables\Columns\TextColumn::make('tanggal_penjualan')->label('Tanggal Penjualan'),
-                Tables\Columns\TextColumn::make('total_harga')->label('Total Harga')
-                    ->money('idr', true),
-                Tables\Columns\TextColumn::make('diskon.nama_diskon')->label('Diskon'),
-            ])
-            ->filters([ /* Add filters if necessary */])
+        return $table->columns([
+            Tables\Columns\TextColumn::make('tanggal_penjualan')->date()->label('Tanggal'),
+            Tables\Columns\TextColumn::make('quantity_jual')->label('Qty'),
+            Tables\Columns\TextColumn::make('pembelian.nama_barang')->label('Barang'), // Gunakan metode namaBarang() untuk mendapatkan nama_barang->label('Barang'),
+
+            Tables\Columns\TextColumn::make('diskon.nama_diskon')->label('Diskon')->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('total_harga_jual')->label('Total Harga')->money('IDR'),
+        ])
+            ->filters([])
             ->actions([
-                EditAction::make(),
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                DeleteBulkAction::make(),
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
     }
 
     public static function getPages(): array

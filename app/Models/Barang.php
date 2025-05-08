@@ -12,27 +12,19 @@ class Barang extends Model
     protected $table = 'barang'; // penting karena tabel kamu 'barang', bukan 'barangs'
 
     protected $fillable = [
-        'kode_barang',
+        'pembelians_id',
+        'penjualans_id',
         'nama_barang',
-        'jenis_barang',
-        'category_id',
-        'merk',
-        'harga_jual',
-        'satuan_barang',
-        'stock',
+        'quantity_barang',
+        'total_harga',
     ];
-    public function category()
+    public function pembelian()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Pembelian::class, 'pembelians_id');
     }
 
-    public function detailPenjualan()
+    public function penjualan()
     {
-        return $this->hasMany(DetailPenjualan::class);
-    }
-
-    public function detailPembelians()
-    {
-        return $this->hasMany(DetailPembelian::class);
+        return $this->belongsTo(Penjualan::class, 'penjualans_id');
     }
 }

@@ -14,8 +14,8 @@ class Category extends Model
         'nama_kategori',
     ];
 
-    public function barangs()
+    public function pembelians()
     {
-        return $this->hasMany(Barang::class);
+        return $this->hasMany(Pembelian::class);
     }
 }

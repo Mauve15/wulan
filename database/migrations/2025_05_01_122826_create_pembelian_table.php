@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('kode_barang')->unique();
             $table->date('tanggal_pembelian');
             $table->string('nama_barang');
-            $table->integer('quantity'); //masuk ke total quantity barang
+            $table->integer('quantity_beli'); //masuk ke total quantity barang
             $table->integer('harga_satuan');
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->string('merk');

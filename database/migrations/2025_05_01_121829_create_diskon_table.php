@@ -13,11 +13,8 @@ return new class extends Migration
     {
         Schema::create('diskons', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_diskon')->unique(); // Unik agar bisa dipakai sebagai kode referensi
-            $table->string('nama_diskon');
-            $table->decimal('jumlah_diskon', 8, 2);  // Akurat, bisa menyimpan angka pecahan seperti 10.5%
-            $table->enum('satuan_diskon', ['persen', 'nominal']); // persen = %, nominal = dalam rupiah
-            $table->text('keterangan_diskon')->nullable();
+            $table->string('nama_diskon');  // Nama diskon, misalnya "Diskon Akhir Tahun"
+            $table->float('persentase');    // Persentase diskon, misalnya 10 (untuk 10%)
             $table->timestamps();
         });
     }

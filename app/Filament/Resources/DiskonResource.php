@@ -2,103 +2,72 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\DiskonResource\Pages;
-use App\Filament\Resources\DiskonResource\RelationManagers;
 use App\Models\Diskon;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
 
 class DiskonResource extends Resource
 {
     protected static ?string $model = Diskon::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static ?string $navigationLabel = 'Diskon';
+    protected static ?string $navigationGroup = 'Penjualan';
 
-    public static function form(Form $form): Form
+    public static function form(Forms\Form $form): Forms\Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('kode_diskon')
-                    ->label('Kode Diskon')
+                TextInput::make('nama_diskon')
                     ->required()
-                    ->unique(ignoreRecord: true),
+                    ->minLength(3)
+                    ->maxLength(50)
+                    ->label('Nama Diskon'),
 
-                Forms\Components\TextInput::make('nama_diskon')
-                    ->label('Nama Diskon')
-                    ->required(),
-
-                Forms\Components\TextInput::make('jumlah_diskon')
-                    ->label('Jumlah Diskon')
-                    ->numeric()
-                    ->required(),
-
-                Forms\Components\Select::make('satuan_diskon')
-                    ->label('Satuan Diskon')
-                    ->options([
-                        'persen' => 'Persen (%)',
-                        'nominal' => 'Nominal (Rp)',
-                    ])
-                    ->required(),
-
-                Forms\Components\Textarea::make('keterangan_diskon')
-                    ->label('Keterangan')
-                    ->rows(3)
-                    ->nullable(),
+                TextInput::make('persentase')
+                    ->required()
+                    ->label('Persentase Diskon')
+                    ->numeric() // Validasi hanya angka
+                    ->helperText('Masukkan persentase dalam angka (misal: 10 untuk 10%)')
+                    ->reactive()
+                    ->rules('min:0|max:100'), // Validasi persentase antara 0 dan 100
             ]);
     }
 
-    public static function table(Table $table): Table
+    public static function table(Tables\Table $table): Tables\Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('kode_diskon')->label('Kode')->searchable(),
-                Tables\Columns\TextColumn::make('nama_diskon')->label('Nama')->searchable(),
-                Tables\Columns\TextColumn::make('jumlah_diskon')
-                    ->label('Jumlah')
-                    ->formatStateUsing(function ($state, $record) {
-                        if ($record->satuan_diskon === 'persen') {
-                            return $state . '%';
-                        } elseif ($record->satuan_diskon === 'nominal') {
-                            return 'Rp ' . number_format($state, 0, ',', '.');
-                        }
-                        return $state;
-                    })
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('satuan_diskon')->label('Satuan')->sortable(),
-                Tables\Columns\TextColumn::make('keterangan_diskon')->label('Keterangan')->limit(30),
-                Tables\Columns\TextColumn::make('created_at')->label('Dibuat')->dateTime()->sortable(),
+                TextColumn::make('nama_diskon')->sortable()->searchable(),
+                TextColumn::make('persentase')
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => number_format($state, 2) . '%'), // Format persentase
+                TextColumn::make('created_at')->dateTime()->sortable(),
+                TextColumn::make('updated_at')->dateTime()->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDiskons::route('/'),
-            'create' => Pages\CreateDiskon::route('/create'),
-            'edit' => Pages\EditDiskon::route('/{record}/edit'),
+            'index' => \App\Filament\Resources\DiskonResource\Pages\ListDiskons::route('/'),
+            'create' => \App\Filament\Resources\DiskonResource\Pages\CreateDiskon::route('/create'),
+            'edit' => \App\Filament\Resources\DiskonResource\Pages\EditDiskon::route('/{record}/edit'),
         ];
     }
 }

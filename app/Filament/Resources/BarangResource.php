@@ -46,15 +46,15 @@ class BarangResource extends Resource
                     ->required()
                     ->maxLength(255),
 
-                // Input untuk harga_jual
-                Forms\Components\TextInput::make('harga_jual')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\TextInput::make('harga_barang')
+                    ->label('Harga Satuan')
+                    ->numeric()
+                    ->disabled(), // atau readonly() jika kamu tidak ingin diubah
 
-                // Input untuk satuan_barang
-                Forms\Components\TextInput::make('satuan_barang')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\TextInput::make('total_harga')
+                    ->label('Total Harga')
+                    ->numeric()
+                    ->disabled(), // atau readonly()
 
                 // Input untuk stock
                 Forms\Components\TextInput::make('stock')
@@ -67,18 +67,16 @@ class BarangResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('kode_barang')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('nama_barang')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('jenis_barang')->sortable(),
-                Tables\Columns\TextColumn::make('category.nama_kategori') // Menampilkan nama kategori dari relasi
-                    ->label('Category')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('merk')->sortable(),
-                Tables\Columns\TextColumn::make('harga_jual')->sortable(),
-                Tables\Columns\TextColumn::make('satuan_barang')->sortable(),
-                Tables\Columns\TextColumn::make('stock')->sortable(),
-                Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable(),
-                Tables\Columns\TextColumn::make('updated_at')->dateTime()->sortable(),
+                Tables\Columns\TextColumn::make('pembelian.kode_barang')->label('Kode Barang')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('pembelian.nama_barang')->label('Nama Barang')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('total_harga')->label('Total Harga')->sortable()->money('IDR'),
+                Tables\Columns\TextColumn::make('pembelian.harga_satuan')->label('Harga Satuan')->sortable()->money('IDR'),
+                Tables\Columns\TextColumn::make('pembelian.category.nama_kategori')->label('Kategori')->sortable(),
+                Tables\Columns\TextColumn::make('pembelian.merk')->label('Merk')->sortable(),
+                Tables\Columns\TextColumn::make('quantity_barang')->label('Stok')->sortable(),
+                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Dibuat')->sortable(),
+                Tables\Columns\TextColumn::make('updated_at')->dateTime()->label('Diperbarui')->sortable(),
+
             ])
             ->filters([ /* Filter jika diperlukan */])
             ->actions([

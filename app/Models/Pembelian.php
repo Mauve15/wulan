@@ -9,20 +9,23 @@ class Pembelian extends Model
 {
     protected $fillable = [
         'kode_pembelian',
-        'kode_supplier',
-        'nama_supplier',
+        'kode_barang',
         'tanggal_pembelian',
-        'total_harga',
-        'diskon_id'
+        'nama_barang',
+        'quantity_beli',
+        'harga_satuan',
+        'category_id',
+        'merk',
+        'status_barang'
     ];
 
-    public function diskon()
+    public function category()
     {
-        return $this->belongsTo(Diskon::class);
+        return $this->belongsTo(Category::class);
     }
 
-    public function detailPembelians()
+    public function barang()
     {
-        return $this->hasMany(DetailPembelian::class);
+        return $this->hasOne(Barang::class, 'pembelians_id');
     }
 }
