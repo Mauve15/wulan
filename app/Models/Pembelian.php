@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
-use App\Models\DetailPembelian;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Pembelian extends Model
 {
     protected $fillable = [
-        'kode_pembelian',
-        'kode_barang',
+        'no_invoice',
+        'no_faktur',
         'tanggal_pembelian',
         'nama_barang',
         'quantity_beli',
         'harga_satuan',
+        'total_harga_beli',
+        'nama_supplier',
         'category_id',
         'merk',
         'status_barang'

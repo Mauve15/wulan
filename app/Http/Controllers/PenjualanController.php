@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Penjualan;
+use Inertia\Inertia;
 use App\Models\Diskon;
+use App\Models\Penjualan;
 use Illuminate\Http\Request;
 
 class PenjualanController extends Controller
 {
     public function index()
     {
-        $penjualans = Penjualan::with('diskon')->get();
-        return view('penjualans.index', compact('penjualans'));
+        $penjualans = Penjualan::with('pembelian')->get();
+
+        return Inertia::render('penjualan', [
+            'penjualans' => $penjualans,
+        ]);
     }
 
     public function create()

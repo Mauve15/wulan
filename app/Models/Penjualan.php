@@ -17,6 +17,9 @@ class Penjualan extends Model
         'barang_id',
         'total_harga_jual',
         'pembelian_id',
+        'markup_id',
+        'ppn',
+        'nama_perusahaan',
     ];
 
     public function barang()
@@ -32,5 +35,9 @@ class Penjualan extends Model
     public function pembelian()
     {
         return $this->belongsTo(Pembelian::class, 'pembelian_id');
+    }
+    public function markup()
+    {
+        return $this->belongsTo(Markup::class, 'markup_id');
     }
 }

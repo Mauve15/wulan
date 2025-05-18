@@ -13,15 +13,17 @@ return new class extends Migration
     {
         Schema::create('pembelians', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_pembelian')->unique();
-            $table->string('kode_barang')->unique();
+            $table->string('no_invoice')->nullable();
+            $table->string('no_faktur')->nullable();
             $table->date('tanggal_pembelian');
             $table->string('nama_barang');
-            $table->integer('quantity_beli'); //masuk ke total quantity barang
-            $table->integer('harga_satuan');
+            $table->integer('quantity_beli')->nullable(); //masuk ke total quantity barang
+            $table->integer('harga_satuan')->nullable();
+            $table->integer('total_harga_beli')->nullable();
+            $table->string('nama_supplier')->nullable();
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->string('merk');
-            $table->string('status_barang');
+            // $table->string('status_barang');
             $table->timestamps();
         });
     }
@@ -31,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pembelian');
+        Schema::dropIfExists('pembelians');
     }
 };

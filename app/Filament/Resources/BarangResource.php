@@ -67,13 +67,13 @@ class BarangResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('pembelian.kode_barang')->label('Kode Barang')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('pembelian.no_invoice')->label('No Invoice')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('pembelian.nama_barang')->label('Nama Barang')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('total_harga')->label('Total Harga')->sortable()->money('IDR'),
+                Tables\Columns\TextColumn::make('quantity_barang')->label('Stok')->sortable(),
                 Tables\Columns\TextColumn::make('pembelian.harga_satuan')->label('Harga Satuan')->sortable()->money('IDR'),
+                Tables\Columns\TextColumn::make('total_harga')->label('Total Harga')->sortable()->money('IDR'),
                 Tables\Columns\TextColumn::make('pembelian.category.nama_kategori')->label('Kategori')->sortable(),
                 Tables\Columns\TextColumn::make('pembelian.merk')->label('Merk')->sortable(),
-                Tables\Columns\TextColumn::make('quantity_barang')->label('Stok')->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Dibuat')->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')->dateTime()->label('Diperbarui')->sortable(),
 

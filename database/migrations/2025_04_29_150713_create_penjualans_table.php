@@ -20,6 +20,9 @@ return new class extends Migration
             $table->foreignId('barang_id')->constrained('barang')->onDelete('cascade'); // Relasi ke barang, jika barang dihapus, penjualan juga ikut dihapus
             $table->integer('total_harga_jual')->nullable(); // Total harga setelah diskon
             $table->foreignId('pembelian_id')->nullable()->constrained('pembelians')->onDelete('cascade'); // Relasi ke pembelian, jika pembelian dihapus, penjualan juga ikut dihapus
+            $table->foreignId('markup_id')->nullable()->constrained('markup')->nullOnDelete(); // Relasi ke markup, nullable jika tidak ada markup
+            $table->integer('ppn')->nullable(); // PPN, nullable jika tidak ada
+            $table->string('nama_perusahaan')->nullable(); // Nama perusahaan, nullable jika tidak ada
             $table->timestamps();
         });
     }

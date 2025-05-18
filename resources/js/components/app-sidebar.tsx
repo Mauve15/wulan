@@ -13,6 +13,21 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
+    {
+        title: 'Pembelian',
+        href: '/pembelian',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Penjualan',
+        href: '/penjualan',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Laporan',
+        href: '/laporan',
+        icon: LayoutGrid,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

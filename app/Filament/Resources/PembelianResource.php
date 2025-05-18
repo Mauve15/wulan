@@ -23,15 +23,20 @@ class PembelianResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('kode_pembelian')->required(),
-                Forms\Components\TextInput::make('kode_barang')->required(),
+                Forms\Components\TextInput::make('no_invoice')->required(),
+                Forms\Components\TextInput::make('no_faktur')->required(),
                 Forms\Components\DatePicker::make('tanggal_pembelian')->required(),
                 Forms\Components\TextInput::make('nama_barang')->required(),
                 Forms\Components\TextInput::make('quantity_beli')->required()->numeric(),
+                // Forms\Components\TextInput::make('total_harga_beli')
+                //     ->numeric()
+                //     ->hidden(), // sembunyikan dari form, tapi tetap terdaftar
+
                 Forms\Components\TextInput::make('harga_satuan')->required()->numeric(),
+                Forms\Components\TextInput::make('nama_supplier')->required(),
                 Forms\Components\Select::make('category_id')->relationship('category', 'nama_kategori')->required(),
                 Forms\Components\TextInput::make('merk')->required(),
-                Forms\Components\TextInput::make('status_barang')->required(),
+                // Forms\Components\TextInput::make('status_barang')->required(),
             ]);
     }
 
@@ -39,15 +44,17 @@ class PembelianResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('kode_pembelian'),
-                Tables\Columns\TextColumn::make('kode_barang'),
+                Tables\Columns\TextColumn::make('tanggal_pembelian')->date(),
                 Tables\Columns\TextColumn::make('nama_barang'),
                 Tables\Columns\TextColumn::make('quantity_beli'),
                 Tables\Columns\TextColumn::make('harga_satuan')->money('IDR'),
-                Tables\Columns\TextColumn::make('category.nama_kategori')->label('Category'),
+                Tables\Columns\TextColumn::make('total_harga_beli')->money('IDR'),
+                // Tables\Columns\TextColumn::make('status_barang'),
+                Tables\Columns\TextColumn::make('no_invoice'),
+                Tables\Columns\TextColumn::make('no_faktur'),
+                Tables\Columns\TextColumn::make('nama_supplier')->label('Supplier'),
                 Tables\Columns\TextColumn::make('merk'),
-                Tables\Columns\TextColumn::make('status_barang'),
-                Tables\Columns\TextColumn::make('tanggal_pembelian')->date(),
+                Tables\Columns\TextColumn::make('category.nama_kategori')->label('Kategori'),
                 Tables\Columns\TextColumn::make('created_at')->dateTime(),
                 Tables\Columns\TextColumn::make('updated_at')->dateTime(),
             ])

@@ -25,17 +25,34 @@ class CreatePenjualan extends CreateRecord
 
         $hargaPerItem = $pembelian->harga_satuan;
         $subtotal = $data['quantity_jual'] * $hargaPerItem;
-        $total = $subtotal * 1.20; // markup 15%
+        // $total = $subtotal * 1.20; // markup 15%
+
+        $markupPersen = 0;
+        if (!empty($data['markup_id'])) {
+            $markup = \App\Models\Markup::find($data['markup_id']);
+            if ($markup) {
+                $markupPersen = $markup->persentase;
+            }
+        }
+
+        $totalSetelahMarkup = $subtotal * (1 + ($markupPersen / 100));
 
         // Cek apakah ada diskon
         if (!empty($data['diskon_id'])) {
             $diskon = Diskon::find($data['diskon_id']);
             if ($diskon) {
-                $total -= ($total * ($diskon->persentase / 100));
+                $totalSetelahMarkup -= ($totalSetelahMarkup * ($diskon->persentase / 100));
             }
         }
 
-        $data['total_harga_jual'] = (int) round($total);
+        // Hitung PPN 11%
+        $nilaiPPN = $totalSetelahMarkup * 0.11;
+
+        // Total akhir setelah PPN
+        $totalFinal = $totalSetelahMarkup + $nilaiPPN;
+
+        $data['ppn'] = (int) round($nilaiPPN);
+        $data['total_harga_jual'] = (int) round($totalFinal);
         $data['barang_id'] = $pembelian->barang->id; // 👈 Tambahkan ini
 
         return $data;
@@ -56,6 +73,7 @@ class CreatePenjualan extends CreateRecord
 
         if ($barang->quantity_barang >= $penjualan->quantity_jual) {
             $barang->quantity_barang -= $penjualan->quantity_jual;
+            $barang->total_harga = $barang->quantity_barang * (int)$pembelian->harga_satuan;
             $barang->save();
         } else {
             throw ValidationException::withMessages([
